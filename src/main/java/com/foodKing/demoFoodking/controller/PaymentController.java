@@ -1,55 +1,58 @@
 package com.foodKing.demoFoodking.controller;
 
-import java.util.Map;
-
+import com.razorpay.RazorpayClient;
+import com.foodKing.demoFoodking.entity.User;
+import com.foodKing.demoFoodking.repository.UserRepository;
+import com.razorpay.Order;
+import com.razorpay.RazorpayException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.razorpay.Order;
-import com.razorpay.RazorpayClient;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth/payment")
+@RequestMapping("/api/user/payment")
 @CrossOrigin("http://localhost:3000")
 public class PaymentController {
 	
-	@Value("${razorpay.key.secret}")
-    private String razorpaySecret;
-	
-	@PostMapping("/create-order")
-	public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> request) {
-        try {
-        	 Object amountObj = request.get("amount");
-             int amount = Integer.parseInt(amountObj.toString());
+	@Autowired
+	private UserRepository userRepository;
 
-            RazorpayClient client = new RazorpayClient("rzp_test_RJTy244ttMYNmU", "qeNlpQu7b7sKz8oj5l0Emlc7");
+    @Value("${razorpay.key_id}")
+    private String keyId;
 
-            JSONObject options = new JSONObject();
-            options.put("amount", amount * 100); // in paise
-            options.put("currency", "INR");
-            options.put("receipt", "txn_" + System.currentTimeMillis());
+    @Value("${razorpay.key_secret}")
+    private String keySecret;
 
-            // Create order in Razorpay
-            Order order = client.orders.create(options);
+    @PostMapping("/create-order")
+    public ResponseEntity<?> createOrder(@RequestBody Map<String, Object> data)
+            throws RazorpayException {
 
-            return ResponseEntity.ok(Map.of("orderData", order.toString()));
-        } catch (Exception e) {
-        	  e.printStackTrace(); // 👈 will print full error in logs
-              return ResponseEntity.status(500).body("Error creating order: " + e.getMessage());
-        }
+        int amount = (int) data.get("amount"); // amount in paise
+
+        RazorpayClient client =
+            new RazorpayClient(keyId, keySecret);
+
+        JSONObject options = new JSONObject();
+        options.put("amount", amount); // 🔥 SAME amount
+        options.put("currency", "INR");
+        options.put("receipt", "rcpt_" + System.currentTimeMillis());
+
+        Order order = client.orders.create(options);
+
+        return ResponseEntity.ok(order.toString());
     }
 
-    // ✅ After Payment Success
-    @PostMapping("/place-after-payment")
-    public ResponseEntity<?> placeAfterPayment(@RequestBody Map<String, Object> data) {
-        System.out.println("Payment Success Data: " + data);
-        return ResponseEntity.ok("Order placed successfully!");
+    @PostMapping("/success")
+    public ResponseEntity<String> paymentSuccess(@RequestBody String payload) {
+        System.out.println("Payment success payload: " + payload);
+        return ResponseEntity.ok("Payment success (test mode)");
     }
-	
-}
+
+}	
+
