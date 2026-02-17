@@ -1,4 +1,4 @@
-package com.foodKing.demoFoodking.entity;
+	package com.foodKing.demoFoodking.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
