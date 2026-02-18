@@ -16,7 +16,10 @@ import com.foodKing.demoFoodking.bean.LoginRequest;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin(origins = {
+	    "http://localhost:3000",
+	    "https://foodking-frontend-spij.vercel.app"
+	})
 public class AuthController {
 	 @Autowired
 	    private registerLoginService registerLoginService;

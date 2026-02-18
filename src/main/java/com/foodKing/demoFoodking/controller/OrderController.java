@@ -18,7 +18,7 @@ import com.foodKing.demoFoodking.entity.UserOrder;
 import com.foodKing.demoFoodking.services.OrderService;
 
 @RestController
-@RequestMapping("/auth/user/order")
+@RequestMapping("/api/auth/user/order")
 @CrossOrigin("http://localhost:3000")
 public class OrderController {
 	
